@@ -1,14 +1,41 @@
 from display import *
 from matrix import *
 
-
 def add_circle( points, cx, cy, cz, r, step ):
-    pass
+    counter = step
+    prevX = None
+    prevY = None
+    prevZ = None
+    while( counter <= 1.00001 ):
+        conv = math.pi * 2 * counter
+        if( prevX == None or prevY == None or prevZ == None ):
+            prevX = r * math.cos(conv) + cx
+            prevY = r * math.sin(conv) + cy
+            prevZ = cz
+        else:
+            newX = r * math.cos(conv) + cx
+            newY = r * math.sin(conv) + cy
+            newZ = cz
+            add_edge( points, prevX, prevY, prevZ, newX, newY, newZ )
+            prevX = newX
+            prevY = newY
+            prevZ = newZ
+        counter += step
+    #outside while loop, do it one more time
+    conv = math.pi * 2 * counter
+    newX = r * math.cos(conv) + cx
+    newY = r * math.sin(conv) + cy
+    newZ = cz
+    add_edge( points, prevX, prevY, prevZ, newX, newY, newZ )
 
 def add_curve( points, x0, y0, x1, y1, x2, y2, x3, y3, step, curve_type ):
     pass
 
+def add_hermite( points, x0, y0, x1, y1, rx0, ry0, rx1, ry1, step ):
+    pass
 
+def add_bezier( points, x0, y0, x1, y1, x2, y2, x3, y3, step ):
+    pass
 
 def draw_lines( matrix, screen, color ):
     if len(matrix) < 2:
