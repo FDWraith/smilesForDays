@@ -29,13 +29,107 @@ def add_circle( points, cx, cy, cz, r, step ):
     add_edge( points, prevX, prevY, prevZ, newX, newY, newZ )
 
 def add_curve( points, x0, y0, x1, y1, x2, y2, x3, y3, step, curve_type ):
-    pass
+    if curve_type == "hermite":
+        add_hermite( points, x0, y0, x1, y1, x2, y2, x3, y3, step)
 
 def add_hermite( points, x0, y0, x1, y1, rx0, ry0, rx1, ry1, step ):
-    pass
+    H = [ [ 2, -3, 0, 1 ],
+          [ -2, 3, 0, 0 ],
+          [ 1, -2, 1, 0 ],
+          [ 1, -1, 0, 0 ] ]
+    H2 = [ [ 2, -2, 1, 1 ],
+           [ -3, 3, -2, -1 ],
+           [ 0, 0, 1, 0 ],
+           [ 1, 0, 0, 0 ] ]
+    Gx = [ [x0, x1, rx0, rx1] ]
+    Gy = [ [y0, y1, ry0, ry1] ]
+
+    matrix_mult( H, Gx )
+    Cx = Gx # result of matrix multiplication
+    matrix_mult( H, Gy)
+    Cy = Gy # same as above
+
+    ax = Cx[0][0]
+    bx = Cx[0][1]
+    cx = Cx[0][2]
+    dx = Cx[0][3]
+
+    #print "a[%d], b[%d], c[%d], d[%d] for x:"%(ax,bx,cx,dx)
+
+    ay = Cy[0][0]
+    by = Cy[0][1]
+    cy = Cy[0][2]
+    dy = Cy[0][3]
+
+    #print "a[%d], b[%d], c[%d], d[%d] for y:"%(ay,by,cy,dy)
+    
+    counter = step
+    prevX = None
+    prevY = None
+    while( counter <= 1.00001 ):
+        if( prevX == None or prevY == None ):
+            prevX = int((ax * counter**3) + (bx * counter**2) + (cx * counter) + dx)
+            prevY = int((ay * counter**3) + (by * counter**2) + (cy * counter) + dy)
+        else:
+            newX = int( (ax * counter**3) + (bx * counter**2) + (cx * counter) + dx )
+            newY = int( (ay * counter**3) + (by * counter**2) + (cy * counter) + dy )
+            #print "drawing line from %d, %d to %d, %d"%(prevX, prevY, newX, newY)
+            add_edge( points, prevX, prevY, 0, newX, newY, 0)
+            prevX = newX
+            prevY = newY
+        counter += step
+    #outside while loop, do it one more time
+    newX = int( (ax * counter**3) + (bx * counter**2) + (cx * counter) + dx )
+    newY = int( (ay * counter**3) + (by * counter**2) + (cy * counter) + dy )
+    add_edge( points, prevX, prevY, 0, newX, newY, 0)
 
 def add_bezier( points, x0, y0, x1, y1, x2, y2, x3, y3, step ):
-    pass
+    B = [ [ -1, 3, -3, 1 ],
+          [ 3, -6, 3, 0 ],
+          [ -3, 3, 0, 0 ],
+          [ 1, 0, 0, 0 ] ]
+    Gx = [ [x0, x1, x2, x3] ]
+    Gy = [ [y0, y1, y2, y3] ]
+
+    matrix_mult( B, Gx )
+    Cx = Gx
+    matrix_mult( B, Gy )
+    Cy = Gy
+
+    ax = Cx[0][0]
+    bx = Cx[0][1]
+    cx = Cx[0][2]
+    dx = Cx[0][3]
+
+    #print "a[%d], b[%d], c[%d], d[%d] for x:"%(ax,bx,cx,dx)
+
+    ay = Cy[0][0]
+    by = Cy[0][1]
+    cy = Cy[0][2]
+    dy = Cy[0][3]
+
+    #print "a[%d], b[%d], c[%d], d[%d] for y:"%(ay,by,cy,dy)
+    
+    counter = step
+    prevX = None
+    prevY = None
+    while( counter <= 1.00001 ):
+        if( prevX == None or prevY == None ):
+            prevX = int((ax * counter**3) + (bx * counter**2) + (cx * counter) + dx)
+            prevY = int((ay * counter**3) + (by * counter**2) + (cy * counter) + dy)
+        else:
+            newX = int( (ax * counter**3) + (bx * counter**2) + (cx * counter) + dx )
+            newY = int( (ay * counter**3) + (by * counter**2) + (cy * counter) + dy )
+            #print "drawing line from %d, %d to %d, %d"%(prevX, prevY, newX, newY)
+            add_edge( points, prevX, prevY, 0, newX, newY, 0)
+            prevX = newX
+            prevY = newY
+        counter += step
+    #outside while loop, do it one more time
+    newX = int( (ax * counter**3) + (bx * counter**2) + (cx * counter) + dx )
+    newY = int( (ay * counter**3) + (by * counter**2) + (cy * counter) + dy )
+    add_edge( points, prevX, prevY, 0, newX, newY, 0)
+    
 
 def draw_lines( matrix, screen, color ):
     if len(matrix) < 2:
